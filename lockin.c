@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 char c = 'a'; // a single character 
 char* lc = "abacada"; // "string" the address of the first character in the sequence
@@ -223,7 +224,7 @@ int main()
 
 // Difference between local arrays and dynamically allocated memory (memory blocks) in functions.
 
-// When function returns, the stakc memory used by arr is reclaimed so they don't exist afterwards
+// When function returns, the stack memory used by arr is reclaimed so they don't exist afterwards
 int* func() {
     int arr[3] = {1, 2, 3};  // ⚠️ Local array (stack memory)
     return arr;  // ⚠️ Undefined behavior!
@@ -240,10 +241,55 @@ int* func() {
 }
 
 int main() {
-    int *data = func();
-    printf("%d\n", data[0]);  // ✅ Works fine
-    free(data);  // ✅ Don't forget to free the memory
+    int* data = func(); // we just assigned the pointer returned from func into data which HAS to be of type int* to store a pointer
+    printf("%d\n", data[0]);
+    free(data);  // free the memory we allocated 
 }
 
 // Note we used type int* for func() because malloc returns a pointer
-// Int cannot be used: this would be wrong because func() is declared to return an int, but arr is an int*
+// int cannot be used: this would be wrong because func() is declared to return an int, but arr is an int*
+
+
+// Block of Structs (can also create blocks for structs w/ malloc)
+student* students_block = (student *)malloc(sizeof(student)*500)
+
+// ------------------------------------------------------------------
+
+// Dealing with strings
+
+// you can store a string as character array
+
+char s1[] = "hi"; // same as char s1[] = {'h', 'i', '\0'}; // note: modifiable but cannot be reassigned
+
+char s3[5]; // create array with enough space to hold "hi" (including null)
+strcpy(s3, s1); // copies the string from s1 to s3
+
+// if "hi" is stored at addresses 1032, 1033, 1034
+// the address of the 'h' is 1032, and s1 gets converted to 1032 when used
+
+char* s2 = 0; 
+s2 = s1; // // legal, but strings are now aliases // s2 becomes 1032 when used (points to address of first element)
+
+strcpy(s2, s1); // not yet OK, cannot copy address since s2 does not have enough space as defined pointer to NULL
+                // same as s2[0] = s1[0], s2[1] = s1[1], ...
+
+s2 = (char*)malloc(sizeof(char)*strlen(s1)+1); // allocate space
+                                               // note: we want to strcpy from s1 to s2
+                                               // multiply by strlen(s1) = # of non-null characters in s1, then +1 for NULL for strings
+                                               // cast as char* since s2 is a pointer of char*
+
+strcpy(s2, s1); // copy the contents of s1 into s2 (s2 has enough space now)
+
+// ---------------------------------------------------------------------
+
+// Pointers to pointers
+
+void set_to_0(int** p_p_a){
+    *p_p_a = 0  // update p_a to 0
+}
+
+int main(){
+    int a = 5;
+    int* p_a = &a;
+    set_to_0(&p_a);     // p_a is now 0. a is not effected! (*p_p_a = value at address which is p_a)
+}
