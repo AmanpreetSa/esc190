@@ -105,7 +105,7 @@ int my_atoi(char* str){
         if (isdigit((unsigned char)str[i])){
             result = result * 10 + (str[i] - '0');
         }
-   }
+    }
    return result;
 }
 
