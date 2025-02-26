@@ -293,3 +293,298 @@ int main(){
     int* p_a = &a;
     set_to_0(&p_a);     // p_a is now 0. a is not effected! (*p_p_a = value at address which is p_a)
 }
+
+// ---------------------------------------------------------------------
+
+// string in structs
+
+struct student1{
+    char* name; // we store the address of where name is stored
+}
+
+// need to allocate name for each student using malloc & free
+
+struct student2{
+    char name[200]; // we store 200 charactesr
+}
+
+// don't need to allocate name for each student (200 characters are already defined/stored)
+
+// Example:
+
+typedef struct student1{
+    char* name;
+    double gpa;
+} student1;
+
+typedef struct student2{
+    char name[200];
+    double gpa;
+} student2; 
+
+student1 make_student1(char* name, double gpa){
+    student1 s1;
+    s1.name = name; // copying name into s1.name
+    s1.gpa = gpa;   // copying gpa into s1.gpa
+    return s1; 
+}
+
+student1 make_student1_new(char* name, double gpa){
+    // create a new block of memory to store the name
+    // store the address of the block at s1.name
+    // copy name to the address s1.name (which you can modify)
+   
+    student1 s1;
+    s1.name = (char *)malloc(sizeof(char)*strlen(name)+1); // use malloc to create enough space for s1.name
+                                                           // name is now address of a block, which you CAN modify
+    strcpy(s1.name, name);  // copy name into s1.name after we made enough space
+    s1.gpa = gpa;
+    return s1; 
+}
+
+student2 make_student2(char* name, double gpa){
+
+    student2 s2;
+    strcpy(s2.name, name); // copy name into s2.name // we cannot reassign to array, but we can copy arrays (if enough space)
+    s2.gpa = gpa;
+    return s2; 
+
+    // SIDE NOTE: strcpy is equivalent to:
+    for (int i = 0; i < strlen(s2.name)+1; i++){
+        s2.name[i] = name[i]; // iterate through len of name, copy each element till the end (including NULL) into s2.name
+    }
+
+    //SIDE NOTE: strlen is equivalent to:
+    size_t my_strlen(const char* str){   
+        size_t len = 0;
+        while (str[len] != '\0'){
+            len++;
+        }
+        return len;
+    }
+}
+ 
+int main(){
+    student1 s1_const = {"Mike", 3.7}; // Directly initalize the struct (dont need a make_student1 function since read-only)
+
+    student1 s1 = make_student1("Mike", 3.7);
+    // cannot do:
+    // s1.name[0] = "m"; // cannot do: "Mike" is read only
+
+    student1 s1_new = make_student1_new("Mike", 3.7);
+    s1_new.name[0] = 'm'; // can do: s1.name is now address of a block, which you CAN modify
+
+    printf("Name: %s\n", s1_new.name);
+
+    // Don't forget to free the allocated memory
+    free(s1_new.name);
+
+    return 0;
+}
+
+// ---------------------------------------------------------------------
+
+// BLOCK OF STRUCTS
+
+typedef struct student{
+    char name[200];
+    double gpa;
+} student;
+
+typedef struct student2{
+    char* name;
+    double gpa;
+} student2;
+
+student2* make_student2_block(int n){
+    student2* students = (student2 *)malloc(sizeof(student2)*n);
+    if (int i = 0; i < n; i++){
+        students[i].name = (char *)malloc(sizeof(char)*200);
+    }
+    return students;
+}
+
+void destory_students(student2* students, int n){
+    if (int i = 0; i < n; i++){
+        free(students[i].name); // if I allocated every name, I first to need to free every name, then free the block
+    }
+    free(students);
+}
+
+int main(){
+    student s1 = {"Mike", 4.8};     // Directly initalize a student struct
+    student students[200];  // Create an array of 200 student structs
+    strcpy(students[5].name, "Bob"); // Copy the string "Bob" into the name field of the 6th student (has 200 characters, so we can copy strings into it)
+
+    student2 student2s[200];
+    // strcpy(student2s[5].name, "Bob"); // Error! Cannot copy string into a pointer that has not been allocated
+
+    // note the stuff on bottom is annoying because we have to allocate memory for each student2.name
+    // we can use a block of structs to avoid this (refer to student2* make_student2_block(int n) function)
+    student2s[5].name = (char *)malloc(sizeof(char)*200);
+    strcpy(student2s[5].name, "Bob");
+    free(student2s[5].name);
+
+    
+    // Free the allocated memory
+    destroy_students(student2s, 200);
+    return 0;
+}
+
+// ---------------------------------------------------------------------
+
+// REALLOC
+
+
+// ----------------------------------------------------------------------
+
+// UNDERSTANDING LINKED LISTS
+
+// Low Level Linked List Implementation
+
+// if the data is 5, 10, 2
+// it will be stored as:
+
+// Example of implementation:
+// 1000 next 3000
+// 1020 data 5
+// 2000 next NULL
+// 2020 data 2
+// 3000 next 2000
+// 3020 data 10
+// 5->10->2
+
+// Linked List starts at 1000
+// Linked List ends at the node for next = NULL
+
+
+// NOTE: We cannot dynamically add an element to an existing array as there could not be space there
+// The only option would be to re-allocate everything to a new location with enough space
+// This is inefficient, especially for larger arrays
+// HERE IS WHERE LINKED LISTS COME THROUGH:
+
+// A list is an ordered collection of data items that supports the following operations:
+// Insert(list, i, x): insert x at position i in the list
+// Remove(list, i): remove the element at position i in the list
+// Get(list, i): return the element at position i in the list
+
+// A linked list consists of a data structure called a node, which consists of the following information
+// data: the actual data you need to store
+// next: the address of the next node
+
+// ---------------------------------------------------------------------
+
+// qsort (Include <stdlib.h> to use qsort)
+
+// qsort provides a generic way to sort arryas
+// Can sort any type of data IFF correct size and comparison function is provided
+
+void qsort(void* base, size_t num, size_t size, int (*compar)(const void *, const void *));
+
+// base: pointer to the first element of the array
+// num: number of elements in the array
+// size: size of each element in the array
+// compar: Pointer to a function that compares two elements (to determine their order)
+
+// 1. Prepare Your Data: whether you have an array of integers, floats, or structs, you must know the size of each element
+int arr[] = {5, 2, 10, 1, 3};
+int n = sizeof(arr)/sizeof(arr[0]);
+
+// 2. Write a Comparison Function
+// The function takes two const void* pointers and returns:
+// A negative value if the first element is less than the second
+// Zero if they are equal
+// A positive value if the first element is greater than the second element
+
+// EXAMPLE OF IMPLEMENTATION:
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int cmp(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+// OR USE THIS COMPARE FUNCTION FOR INTEGERS, DOESN'T MATTER
+int compareInts(const void *a, const void *b) {
+    int intA = *(const int *)a;
+    int intB = *(const int *)b;
+    return (intA > intB) - (intA < intB);
+}
+
+int main(void) {
+    int arr[] = { 3, 1, 4, 1, 5, 9, 2 };
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    qsort(arr, n, sizeof(int), cmp);
+
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
+
+// EXPECTED OUTPUT: 1 1 2 3 4 5 9
+
+// ---------------------------------------------------------------------
+
+// strcat:
+
+// strcat concatenates two strings
+// The first string must have enough space to store the second string
+
+// EXAMPLE OF IMPLEMENTATION:
+
+char dest[20] = "hello";
+char src[] = "world";
+strcat(dest, src);
+printf("%s\n", dest); // Output: helloworld
+
+// ---------------------------------------------------------------------
+
+// strcmp:
+
+// strcmp compares two strings lexicographically (alphabetically)
+// Returns a negative value if the first string is less than the second
+// Returns zero if the strings are equal
+// Returns a positive value if the first string is greater than the second
+
+// good to use as C doesn't have a proper way to compare strings (no == operator)
+
+// EXAMPLE OF IMPLEMENTATION:
+
+int main() {
+    char password[] = "secure123";
+    char input[20];
+
+    printf("Enter password: ");
+    scanf("%s", input);
+
+    if (strcmp(password, input) == 0) {
+        printf("Access Granted!\n");
+    } else {
+        printf("Access Denied!\n");
+    }
+
+    return 0;
+}
+
+// ---------------------------------------------------------------------
+
+// atoi
+
+// atoi converts a string to an integer
+// Returns 0 if the string is not a valid integer
+
+// EXAMPLE OF IMPLEMENTATION:
+
+int main() {
+    char str[] = "123";
+    int num = atoi(str);
+    printf("%d\n", num); // Output: 123
+
+    return 0;
+}
+
