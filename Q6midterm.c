@@ -66,3 +66,49 @@ int main(){
     return 0;
 }
 
+
+// ------------------------------------------------------------------------------------
+
+// More Optimized Solution (partially finished)
+
+typedef struct student{
+    char id[11];
+    int *grades;
+    int num_grades;
+    double average;
+} student;
+
+void read_in_students(student *students, char *files[], int num_files)
+{
+    // students is a block of struct students, preallocated
+    char line[1000];
+    char cur_student[100];
+
+    for (i = 0; i < num_files; i++){
+        FILE *fp = fopen(files[i], "r");
+        while (fgets(line, 100, fp) != NULL){
+            strncpy(cur_student, line, 10); // cur_student 
+                                            // is the current student
+
+            int grade;
+            atoi(line + 11, &grades);
+            for (int j = 0; j < num_students; j++){
+                if (strcmp(cur_student, students[j].id) == 0){
+                    students[j].grades[students[j].num_grades] 
+                }
+            }
+
+
+        }
+    }
+}
+
+void create_block_of_students(student **p_students, int num_students, int num_courses)
+{
+    *p_students = malloc(num_students*sizeof(student));
+    for (int i = 0; i < num_students; i++){
+        (*p_students)[i].grades = malloc(num_courses * sizeof(int));
+        (*p_students)[i].num_grades = 0;
+        (*p_students)[i].average = 0;
+    }
+}
