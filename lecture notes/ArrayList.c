@@ -1,20 +1,6 @@
 #include "ArrayList.h"
 #include <stdlib.h>
 #include <stdio.h>
-// typedef struct ArrayList{
-//     int *array;
-//     int size;
-//     int capacity;
-// } AL;
-
-// void create_list(AL **list);
-// void destroy_list(AL *list);
-
-
-// void insert_list(AL *list, int data);
-// void print_list(AL *list);
-// void delete_list(AL *list, int data);
-// void destroy_list(AL *list);
 
 void create_list(AL **list){
     *list = (AL *)malloc(sizeof(AL));
