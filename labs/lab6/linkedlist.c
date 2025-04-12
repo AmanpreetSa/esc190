@@ -1,7 +1,5 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include "linkedlist.h"
+#include <stdlib.h>
 
 void create_node(node** p_n, int data){
     *p_n = (node *)malloc(sizeof(node));
@@ -12,21 +10,19 @@ void create_node(node** p_n, int data){
 void create_LL_from_data(LL** p_LL, int* data_arr, int size){
     *p_LL = (LL *)malloc(sizeof(LL));
     (*p_LL)->head = NULL;
-    (*p_LL)->size = size;
+    (*p_LL)->size = 0;
 
-    int i = 0;
     node* prev = NULL;
-    while (i < size){
+    for (int i = 0; i < size; i++){
         node* cur;
         create_node(&cur, data_arr[i]);
         if (i == 0){
             (*p_LL)->head = cur;
-        }
-        else{
+        } else {
             prev->next = cur;
         }
         prev = cur;
-        i++;
+        (*p_LL)->size++;
     }
 }
 
@@ -34,67 +30,93 @@ void LL_append(LL* my_list, int new_elem){
     node* new_node;
     create_node(&new_node, new_elem);
     
-    if (my_list->head == NULL){ // if the list is empty
-        my_list->head = new_node; // set the head to the new node
-    }
-    else{
-        node* cur = my_list->head; // start at the head
-        while (cur->next != NULL){ // while not at the end of the list
-            cur = cur->next; // move to the next node
+    if (my_list->head == NULL){
+        my_list->head = new_node;
+    } else {
+        node* cur = my_list->head;
+        while (cur->next != NULL){
+            cur = cur->next;
         }
-    cur->next = new_node; // set the next of the last node to the new node
+        cur->next = new_node;
     }
-    my_list->size++; // increment the size of the list
+    my_list->size++;
 }
 
 int validate_list_length(LL* my_list, int length){
     int count = 0;
-    node* cur = my_list->head; // initalize a pointer, cur, which holds the value of pointer my_list of head which exists in LL struct
+    node* cur = my_list->head;
     while (cur != NULL){
         count++;
         cur = cur->next;
     }
-
-    if (count == length){
-        return 1;
-    }
-    return 0;
+    return (count == length);
 }
 
-p_a = 5;
+void delete_node(LL* my_list, int index){
+    if (index < 0 || index >= my_list->size) return; // invalid index
 
-void delete(LL* my_list, int index){
     node* cur = my_list->head;
-    if (index == 0){    // delete the head node (index 0)
+    if (index == 0){
         my_list->head = cur->next;
         free(cur);
-    }
-    else{
-        node* prev = NULL;  
-        for (int i = 0; i < index; i++){ // traverse LL before one before index (only <, not <=)
+    } else {
+        node* prev = NULL;
+        for (int i = 0; i < index; i++){
             prev = cur;
             cur = cur->next;
         }
-        // update the next pointer to skip the node to be deleted
         prev->next = cur->next;
         free(cur);
     }
-    mylist->size--; // decrement the size of the list (since we removed the index at node)
+    my_list->size--;
 }
 
 void insert(LL* my_list, int index, int data){
+    if (index < 0 || index > my_list->size) return; // invalid index
+
     node* new_node;
-    create_node(&new_node, data);           // allocated memory for new node, set data, and set next to NULL
-    if (index == 0){                        // if the index we are inserting at is at index 0
-        new_node->next = my_list->head;     // set the next of the new node to the head of the list
-        my_list->head = new_node;           // set the head of the list to the new node
-    }
-    else{
-        node* cur = my_list->head;          // start at the head
-        for (int i = 0; i < index - 1; i++){ // traverse LL before one before index (only <, not <=)
+    create_node(&new_node, data);
+
+    if (index == 0){
+        new_node->next = my_list->head;
+        my_list->head = new_node;
+    } else {
+        node* cur = my_list->head;
+        for (int i = 0; i < index - 1; i++){
             cur = cur->next;
         }
-        new_node->next = cur->next;         // set the next of the new node to the next of the current node
-        cur->next = new_node;               // set the next of the current node to the new node
-    }  
+        new_node->next = cur->next;
+        cur->next = new_node;
+    }
+    my_list->size++;
+}
+
+int search(LL* my_list, int target){
+    node* cur = my_list->head;
+    int index = 0;
+    while (cur != NULL){
+        if (cur->data == target) return index;
+        cur = cur->next;
+        index++;
+    }
+    return -1; // not found
+}
+
+void printList(LL* my_list){
+    node* cur = my_list->head;
+    while (cur != NULL){
+        printf("%d -> ", cur->data);
+        cur = cur->next;
+    }
+    printf("NULL\n");
+}
+
+void freeList(LL* my_list){
+    node* cur = my_list->head;
+    while (cur != NULL){
+        node* temp = cur;
+        cur = cur->next;
+        free(temp);
+    }
+    free(my_list);
 }
